@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+{% block title %}My Health History{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+    <div class="section-header">
+        <h2>My Health History</h2>
+        <p>A complete record of your consultations, reports, and prescriptions.</p>
+    </div>
+
+    <div class="content-box">
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs" id="historyTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="symptom-forms-tab" data-bs-toggle="tab" data-bs-target="#symptom-forms" type="button" role="tab" aria-controls="symptom-forms" aria-selected="true">
+                    Symptom Forms
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="consultations-tab" data-bs-toggle="tab" data-bs-target="#consultations" type="button" role="tab" aria-controls="consultations" aria-selected="false">
+                    Doctor Responses
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports" type="button" role="tab" aria-controls="reports" aria-selected="false">
+                    Lab Reports
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="historyTabsContent" style="padding-top: 1.5rem;">
+            
+            <!-- NEW: Symptom Forms Tab Pane -->
+            <div class="tab-pane fade show active" id="symptom-forms" role="tabpanel" aria-labelledby="symptom-forms-tab">
+                <h5>Your Submitted Symptom Forms</h5>
+                {% if consultations %}
+                    <div class="list-group mt-3">
+                    {% for case in consultations %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Submission from {{ case.created_at[:10] }}</h6>
+                                <span class="badge bg-{% if case.status == 'Pending' %}warning text-dark{% elif case.status == 'Under Review' %}info text-dark{% else %}success{% endif %}">{{ case.status }}</span>
+                            </div>
+                            <p class="mb-1"><strong>Symptoms Described:</strong> {{ case.symptoms }}</p>
+                            {% if case.photo_filename %}
+                                <small><strong>Photo Submitted:</strong> <a href="{{ url_for('static', filename='uploads/' + case.photo_filename) }}" target="_blank">View Image</a></small>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <p>You have not submitted any symptom forms yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Doctor Responses (Previously "Past Consultations") Tab Pane -->
+            <div class="tab-pane fade" id="consultations" role="tabpanel" aria-labelledby="consultations-tab">
+                <h5>Doctor Responses</h5>
+                {% if consultations %}
+                    <div class="accordion" id="consultationAccordion">
+                    {% for case in consultations %}
+                        {% if case.status == 'Reviewed' %}
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-{{ case.id }}">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ case.id }}">
+                                        <strong>Response for Case #{{ case.id }}</strong>&nbsp;(from Dr. {{ case.doctor_name }})
+                                    </button>
+                                </h2>
+                                <div id="collapse-{{ case.id }}" class="accordion-collapse collapse" data-bs-parent="#consultationAccordion">
+                                    <div class="accordion-body">
+                                        <p><strong>Prescription & Advice:</strong><br>{{ case.doctor_response | replace('\n', '<br>') | safe }}</p>
+                                        {% if case.audio_note_filename %}
+                                            <p><strong>Audio Note:</strong></p>
+                                            <audio controls src="{{ url_for('static', filename='uploads/' + case.audio_note_filename) }}"></audio>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <p>You have no responses from doctors yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Lab Reports Tab Pane -->
+            <div class="tab-pane fade" id="reports" role="tabpanel" aria-labelledby="reports-tab">
+                <h5>Your Lab Reports</h5>
+                {% if lab_reports %}
+                    <ul class="list-group mt-3">
+                    {% for report in lab_reports %}
+                        <li class="list-group-item">
+                            <strong>Report from {{ report.created_at[:10] }}:</strong> {{ report.original_filename }}
+                            <p class="mt-2"><strong>Simplified Assessment:</strong><br>{{ report.simplified_report or 'Analysis pending.' }}</p>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>You have not submitted any lab reports for assessment yet.</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+

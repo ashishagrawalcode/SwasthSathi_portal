@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+{% block title %}Welcome to SwasthSathi{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Comprehensive Healthcare, Simplified.</h1>
+            <p>SwasthSathi connects you with doctors, offers wellness tools, and puts your health records at your fingertips. Your wellness journey starts here.</p>
+            <a href="#portals" class="btn btn-primary btn-lg">Browse Through Portals</a>
+        </div>
+    </div>
+</section>
+
+<section class="portals-section" id="portals">
+    <div class="container">
+        <div class="section-header">
+            <h2>Access Your Portal</h2>
+            <p>Please select your role to log in and access your dedicated dashboard.</p>
+        </div>
+        <div class="portals-grid">
+            <div class="portal-card">
+                <i class="fas fa-user"></i>
+                <h3>Patient Portal</h3>
+                <p>Access your appointments, health records, and prescriptions.</p>
+                <a href="{{ url_for('login') }}" class="btn btn-secondary">Login as Patient</a>
+            </div>
+            <div class="portal-card">
+                <i class="fas fa-user-md"></i>
+                <h3>Doctor Portal</h3>
+                <p>Manage your patient consultations, schedules, and issue prescriptions.</p>
+                <a href="{{ url_for('login') }}" class="btn btn-secondary">Login as Doctor</a>
+            </div>
+            <div class="portal-card">
+                <i class="fas fa-hands-helping"></i>
+                <h3>ASHA Portal</h3>
+                <p>Manage community health data, track beneficiaries, and log activities.</p>
+                <a href="{{ url_for('login') }}" class="btn btn-secondary">ASHA Login</a>
+            </div>
+
+            <div class="portal-card">
+                <i class="fas fa-landmark"></i>
+                <h3>Government Portal</h3>
+                <p>View anonymized public health data and system analytics.</p>
+                <a href="{{ url_for('login') }}" class="btn btn-secondary">Admin Login</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="features" class="features">
+    <div class="container">
+        <div class="section-header">
+            <h2>Our Core Features</h2>
+            <p>Everything you need for better health management.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-user-doctor"></i>
+                <h3>Expert Doctor Search</h3>
+                <p>Find specialists by symptoms or expertise from our network.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-robot"></i>
+                <h3>AI Wellness Chatbot</h3>
+                <p>A friendly AI companion for mental wellness support and guidance, available 24/7.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-laptop-medical"></i>
+                <h3>Telemedicine</h3>
+                <p>Secure video and chat consultations with doctors from the comfort of your home.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-notes-medical"></i>
+                <h3>Digital Prescriptions</h3>
+                <p>Receive, manage, and share downloadable digital prescriptions with any pharmacy.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }} <!-- This line prevents the PWA script in layout.html from being overwritten -->
+    <script>
+        // This waits for the whole page to load first
+        window.onload = () => {
+            // After a brief delay, smoothly scroll to the portals section
+            setTimeout(() => {
+                const portalsElement = document.getElementById('portals');
+                if (portalsElement) {
+                    portalsElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }, 500); // 500ms = half-second delay
+        };
+    </script>
+{% endblock %}
+

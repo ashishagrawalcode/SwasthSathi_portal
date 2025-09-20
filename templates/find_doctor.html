@@ -1,0 +1,158 @@
+{% extends "layout.html" %}
+{% block title %}Find a Doctor{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    /* --- Styles for the Doctor Search Page --- */
+    .search-form-container {
+        margin-bottom: 2rem;
+    }
+    .google-search-form .google-search-wrapper {
+        position: relative;
+    }
+    .google-search-form .fa-search {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #aaa;
+    }
+    .google-search-form input {
+        width: 100%;
+        padding: 12px 20px 12px 45px;
+        border-radius: 50px;
+        border: 1px solid #ddd;
+        font-size: 1.1rem;
+    }
+    .doctor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    .doctor-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        text-align: center;
+        padding: 1.5rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .doctor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .doctor-card-header .fa-user-md {
+        font-size: 3rem;
+        color: #0d6efd;
+        margin-bottom: 1rem;
+    }
+    .doctor-card-body h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.25rem;
+    }
+    .doctor-card-body .specialty {
+        color: #6c757d;
+        font-weight: 500;
+    }
+    .doctor-card-body .hospital {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    .doctor-card .btn {
+        width: 100%;
+        padding: 0.75rem;
+    }
+    .no-results-message {
+        text-align: center;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    .hidden {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+    <div class="section-header text-center">
+        <h2>Find Your Specialist</h2>
+        <p class="lead">Search for a doctor by name, specialty, or hospital.</p>
+    </div>
+
+    <div class="search-form-container">
+        <form class="google-search-form" id="doctor-search-form" onsubmit="return false;">
+            <div class="google-search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="doctor-search-input" placeholder="e.g., Dr. Sharma, Cardiology, or City Hospital">
+            </div>
+        </form>
+    </div>
+
+    <div class="doctor-grid" id="doctor-grid">
+        {% for doctor in doctors %}
+        <div class="doctor-card" 
+             data-name="{{ doctor.name|lower }}" 
+             data-specialty="{{ (doctor.specialty or '')|lower }}" 
+             data-hospital="{{ (doctor.hospital or '')|lower }}">
+            <div class="doctor-card-header">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <div class="doctor-card-body">
+                <h3>{{ doctor.name }}</h3>
+                <p class="specialty">{{ doctor.specialty or 'General Practice' }}</p>
+                <p class="hospital">{{ doctor.hospital or 'Independent' }}</p>
+                <!-- FIX: Removed patient_id from url_for as the backend gets it from the session -->
+                <a href="{{ url_for('start_chat', doctor_id=doctor.id) }}" class="btn btn-primary">
+                    <i class="fas fa-comments me-2"></i>Consult Now
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="no-results-message hidden" id="no-results">
+        <h3>No Doctors Found</h3>
+        <p>We couldn't find any doctors matching your search. Please try different keywords.</p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('doctor-search-input');
+        const doctorGrid = document.getElementById('doctor-grid');
+        const doctorCards = doctorGrid.getElementsByClassName('doctor-card');
+        const noResultsMessage = document.getElementById('no-results');
+
+        searchInput.addEventListener('input', function () {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let resultsFound = false;
+
+            for (let i = 0; i < doctorCards.length; i++) {
+                const card = doctorCards[i];
+                const name = card.dataset.name;
+                const specialty = card.dataset.specialty;
+                const hospital = card.dataset.hospital;
+
+                // Check if any of the data attributes include the search term
+                if (name.includes(searchTerm) || specialty.includes(searchTerm) || hospital.includes(searchTerm)) {
+                    card.style.display = ''; // Show card
+                    resultsFound = true;
+                } else {
+                    card.style.display = 'none'; // Hide card
+                }
+            }
+            
+            // Toggle the visibility of the "no results" message
+            if (resultsFound) {
+                noResultsMessage.classList.add('hidden');
+            } else {
+                noResultsMessage.classList.remove('hidden');
+            }
+        });
+    });
+</script>
+{% endblock %}
+

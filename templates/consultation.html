@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block title %}Live Consultation{% endblock %}
+
+
+{% block content %}
+<div class="new-consult-container">
+    <div class="consult-chat-view">
+        <div class="consult-header">
+            <div class="doctor-info">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <strong>{{ doctor_name }}</strong>
+                    <span>Online</span>
+                </div>
+            </div>
+            <div class="consult-actions">
+                <button class="btn btn-secondary" id="start-video-call-btn"><i class="fas fa-video"></i> Start Video Call</button>
+            </div>
+        </div>
+        <div class="consult-messages" id="live-chat-messages">
+            <div class="message received">
+                <p>Hello! I'm ready to begin the consultation. How can I help you today?</p>
+                <span class="timestamp">9:32 PM</span>
+            </div>
+        </div>
+        <div class="consult-input-area">
+            <button class="icon-btn"><i class="fas fa-paperclip"></i></button>
+            <input type="text" placeholder="Type a message...">
+            <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div class="video-call-modal" id="video-call-modal">
+        <div class="video-call-content">
+            <div class="video-header">
+                <h4>Video Call with {{ doctor_name }}</h4>
+                <button class="close-modal-btn" id="close-video-call-btn">&times;</button>
+            </div>
+            <div class="video-area">
+                <div class="main-video">
+                    [Image of a professional doctor on a video call]
+                </div>
+                <div class="user-video">
+                    <span>Your Video</span>
+                </div>
+            </div>
+            <div class="call-controls">
+                <button class="control-btn"><i class="fas fa-microphone-slash"></i></button>
+                <button class="control-btn"><i class="fas fa-video-slash"></i></button>
+                <button class="control-btn end-call"><i class="fas fa-phone-slash"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

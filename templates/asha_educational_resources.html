@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}Educational Resources{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Educational Resources</h1>
+        <a href="{{ url_for('asha_communication') }}" class="btn btn-secondary">Back to Hub</a>
+    </div>
+
+    <div class="row">
+        {% for resource in resources %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ resource.title }}</h5>
+                    <p class="card-text">{{ resource.description }}</p>
+                    {% if resource.type == 'video' %}
+                    <a href="{{ resource.url }}" class="btn btn-primary" target="_blank">Watch Video</a>
+                    {% elif resource.type == 'pdf' %}
+                    <a href="{{ resource.url }}" class="btn btn-success" target="_blank">Download Guide</a>
+                    {% else %}
+                    <a href="{{ resource.url }}" class="btn btn-info" target="_blank">View Details</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center">
+            <div class="alert alert-info">No educational resources available at this time.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

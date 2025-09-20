@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %}Available Patient Cases{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+    <div class="section-header">
+        <h2>Available Patient Cases</h2>
+        <p>A list of new patient consultations waiting for review.</p>
+    </div>
+
+    <div class="content-box">
+        {% if cases %}
+            <div class="list-group" style="margin-top: 1.5rem;">
+                {% for case in cases %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Case #{{ case.id }} - {{ case.patient_name }}</h5>
+                            <small>Submitted: {{ case.created_at[:10] }}</small>
+                        </div>
+                        <p class="mb-1"><strong>Symptoms:</strong> {{ case.symptoms[:100] }}{% if case.symptoms|length > 100 %}...{% endif %}</p>
+                        <small>Category: {{ case.category }}</small>
+                        
+                        <!-- Form with a button to accept the case -->
+                        <form action="{{ url_for('accept_case', case_id=case.id) }}" method="POST" class="mt-2">
+                            <button type="submit" class="btn btn-sm btn-success">Review & Accept Case</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted" style="margin-top: 1.5rem;">There are no new patient cases available at this time.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

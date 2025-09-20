@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+
+{% block title %}ASHA Patient List{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">My Patients</h1>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" id="searchPatient" placeholder="Search by name or ID">
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Patient ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Age</th>
+                    <th scope="col">Household</th>
+                    <th scope="col">Last Visit</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>{{ patient.id }}</td>
+                    <td>{{ patient.name }}</td>
+                    <td>{{ patient.age }}</td>
+                    <td>{{ patient.household_id }}</td>
+                    <td>{{ patient.last_visit_date }}</td>
+                    <td><span class="badge bg-{{ patient.status_class }}">{{ patient.status }}</span></td>
+                    <td>
+                        <a href="{{ url_for('asha_view_patient', patient_id=patient.id) }}" class="btn btn-sm btn-outline-primary">View Profile</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center">No patients found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4 text-center">
+        <a href="{{ url_for('asha_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

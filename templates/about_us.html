@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+<style>
+    /* These styles create the clean, modern "home page" look for the feature grid.
+       They are self-contained here to not affect your other pages.
+    */
+    .feature-grid .card {
+        border: none;
+        background-color: #ffffff; /* Clean white background */
+        border-radius: 15px;      /* Softer, rounded corners */
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-align: center;
+        padding: 2rem 1rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05); /* Subtle shadow for depth */
+    }
+    .feature-grid .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .feature-grid .feature-icon {
+        font-size: 3rem;          /* Large, prominent icons */
+        margin-bottom: 1rem;
+        color: #0d6efd;           /* A vibrant blue for the icons */
+    }
+    .feature-grid .card-title {
+        font-weight: 600;         /* Make titles stand out */
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    .feature-grid .card-text {
+        color: #6c757d;           /* Softer text color for the description */
+    }
+</style>
+
+<div class="container page-container">
+    <div class="section-header">
+        <h2>About ArogHub</h2>
+        <p>Your trusted partner in navigating the future of healthcare.</p>
+    </div>
+
+    <div class="content-box">
+        <h3>Our Mission</h3>
+        <p>At ArogHub, our mission is to empower patients by providing accessible, intelligent, and comprehensive digital health tools. We believe in leveraging cutting-edge technology to simplify your health journey, from finding the right doctor to understanding your health better.</p>
+    </div>
+
+    <div class="content-box" style="margin-top: 2rem;">
+        <h3 class="text-center">Our Features</h3>
+        <p class="text-center">We provide a suite of tools designed to put you in control of your health:</p>
+        
+        <div class="row feature-grid" style="margin-top: 2.5rem;">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-user-md"></i></div>
+                        <h5 class="card-title">Find Your Doctor</h5>
+                        <p class="card-text">Easily search for and connect with specialized doctors.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-flask"></i></div>
+                        <h5 class="card-title">AI Lab Report Assessment</h5>
+                        <p class="card-text">Get intelligent insights and explanations of your lab reports.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-stethoscope"></i></div>
+                        <h5 class="card-title">AI Symptom Checker</h5>
+                        <p class="card-text">A smart tool to help you understand your symptoms.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-book-medical"></i></div>
+                        <h5 class="card-title">Health Awareness</h5>
+                        <p class="card-text">Access a library of articles and tips to stay healthy.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-pills"></i></div>
+                        <h5 class="card-title">Search for Medicines</h5>
+                        <p class="card-text">Find information and availability of medicines.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-history"></i></div>
+                        <h5 class="card-title">Patient History</h5>
+                        <p class="card-text">Keep your complete medical history securely in one place.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

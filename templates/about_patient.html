@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block title %}About Patient Portal{% endblock %}
+
+{% block content %}
+<style>
+    /* These styles create the clean, modern "home page" look for the feature grid. */
+    .feature-grid .card {
+        border: none;
+        background-color: #ffffff;
+        border-radius: 15px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-align: center;
+        padding: 2rem 1rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .feature-grid .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .feature-grid .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #0d6efd;
+    }
+    .feature-grid .card-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+    .feature-grid .card-text {
+        color: #6c757d;
+    }
+</style>
+
+<div class="container page-container">
+    <div class="section-header">
+        <h2>About ArogHub Patient Portal</h2>
+        <p>Aapka Swasth, Humare Saath.</p>
+    </div>
+
+    <div class="content-box" style="margin-top: 2rem;">
+        <h3 class="text-center">Our Features for Patients</h3>
+        <div class="row feature-grid justify-content-center" style="margin-top: 2.5rem;">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100"><div class="card-body"><div class="feature-icon"><i class="fas fa-user-md"></i></div><h5 class="card-title">Find Your Doctor</h5><p class="card-text">Apne liye sahi doctor search karein aur connect karein.</p></div></div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100"><div class="card-body"><div class="feature-icon"><i class="fas fa-flask"></i></div><h5 class="card-title">AI Lab Reports</h5><p class="card-text">Apne lab reports ko aasani se samjhein.</p></div></div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100"><div class="card-body"><div class="feature-icon"><i class="fas fa-stethoscope"></i></div><h5 class="card-title">AI Symptom Checker</h5><p class="card-text">Apne symptoms ko behtar tarike se jaanein.</p></div></div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100"><div class="card-body"><div class="feature-icon"><i class="fas fa-robot"></i></div><h5 class="card-title">AI-Wellness</h5><p class="card-text">Get personalized wellness tips from our AI assistant.</p></div></div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100"><div class="card-body"><div class="feature-icon"><i class="fas fa-book-medical"></i></div><h5 class="card-title">Health Awareness</h5><p class="card-text">Healthy rehne ke liye zaroori jaankari paayein.</p></div></div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100"><div class="card-body"><div class="feature-icon"><i class="fas fa-pills"></i></div><h5 class="card-title">Search for Medicines</h5><p class="card-text">Dawao ki jaankari aur availability check karein.</p></div></div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100"><div class="card-body"><div class="feature-icon"><i class="fas fa-history"></i></div><h5 class="card-title">Patient History</h5><p class="card-text">Apni saari medical history ek jagah secure rakhein.</p></div></div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card h-100"><div class="card-body"><div class="feature-icon"><i class="fas fa-university"></i></div><h5 class="card-title">Government Schemes</h5><p class="card-text">Stay updated on beneficial govt. health programs.</p></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

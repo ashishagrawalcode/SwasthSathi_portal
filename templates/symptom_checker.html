@@ -1,0 +1,296 @@
+{% extends "layout.html" %}
+{% block title %}AI Symptom Checker{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom styles for the symptom checker and results display */
+    .symptom-checker-container {
+        max-width: 700px;
+        margin: auto;
+    }
+    .result-card {
+        background-color: #fff;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-top: 2rem;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .result-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1rem;
+    }
+    .result-header h2 {
+        color: #0d6efd;
+    }
+    .result-item {
+        margin-bottom: 1.5rem;
+    }
+    .result-item h5 {
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    .result-item p {
+        font-size: 1.1rem;
+        color: #212529;
+    }
+    .urgency-High, .urgency-Immediate {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .urgency-Medium {
+        color: #ffc107;
+        font-weight: bold;
+    }
+    .urgency-Low {
+        color: #198754;
+        font-weight: bold;
+    }
+    .disclaimer {
+        font-size: 0.85rem;
+        text-align: center;
+        color: #6c757d;
+        margin-top: 2rem;
+    }
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    #loading-spinner, #submission-feedback {
+        display: none;
+        text-align: center;
+        padding: 3rem;
+    }
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+    #error-message {
+        display: none;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<div class="container page-container symptom-checker-container">
+    
+    <div id="symptom-form-container">
+        <div class="section-header">
+            <h2>AI Symptom Checker</h2>
+            <p>Please provide information for an AI-powered initial assessment.</p>
+        </div>
+        <div class="content-box">
+            <div id="error-message" class="alert alert-danger"></div>
+            <form id="symptom-form">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ session.user_name }}" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="age" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="age" name="age" placeholder="e.g., 35" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender" required>
+                            <option value="" selected disabled>Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="symptoms" class="form-label">Describe Symptoms</label>
+                    <textarea class="form-control" id="symptoms" name="symptoms" rows="5" placeholder="Be as detailed as possible..." required></textarea>
+                </div>
+                <hr>
+                <button type="submit" class="btn btn-primary w-100">Get AI Assessment</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="loading-spinner">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3">Analyzing your symptoms with AI...</p>
+    </div>
+
+    <!-- Container for submission feedback messages -->
+    <div id="submission-feedback"></div>
+
+    <div id="result-container" style="display: none;">
+        <div class="result-card">
+            <div class="result-header"><h2>AI Preliminary Assessment</h2></div>
+            <div class="result-item">
+                <h5>Possible Condition</h5><p id="result-illness"></p>
+            </div>
+            <div class="result-item">
+                <h5>Urgency Level</h5><p id="result-urgency"></p>
+            </div>
+             <div class="result-item">
+                <h5>Suggested Specialist</h5><p id="result-specialist"></p>
+            </div>
+            <div class="result-item">
+                <h5>Explanation</h5><p id="result-explanation"></p>
+            </div>
+            <p class="disclaimer"><i class="fas fa-exclamation-triangle"></i> This is not a medical diagnosis. Please consult a professional.</p>
+            
+            <!-- MODIFIED: Action buttons for submitting the case to a doctor -->
+            <div class="action-buttons">
+                <button id="start-over-btn" class="btn btn-secondary">Start New Assessment</button>
+                <button id="submit-to-doctor-btn" class="btn btn-primary">Submit for Doctor Review</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const API_KEY = "AIzaSyCYcu-XR2BqAPN9zuF4EeyDLmt6WdvqJbk";
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
+
+    // --- Element References ---
+    const formContainer = document.getElementById('symptom-form-container');
+    const symptomForm = document.getElementById('symptom-form');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const resultContainer = document.getElementById('result-container');
+    const errorMessageDiv = document.getElementById('error-message');
+    const submissionFeedback = document.getElementById('submission-feedback');
+    const submitToDoctorBtn = document.getElementById('submit-to-doctor-btn');
+    const startOverBtn = document.getElementById('start-over-btn');
+
+    // --- State Variables to hold data between steps ---
+    let patientInfoCache = {};
+    let aiAnalysisCache = {};
+
+    // --- Event Listeners ---
+    symptomForm.addEventListener('submit', handleGetAIAssessment);
+    submitToDoctorBtn.addEventListener('click', handleSubmitToDoctor);
+    startOverBtn.addEventListener('click', () => window.location.reload());
+
+    /**
+     * Handles the initial form submission to get the AI analysis.
+     */
+    async function handleGetAIAssessment(event) {
+        event.preventDefault();
+        errorMessageDiv.style.display = 'none';
+
+        // Cache patient info for later submission to the backend
+        patientInfoCache = {
+            name: document.getElementById('name').value,
+            age: document.getElementById('age').value,
+            gender: document.getElementById('gender').value,
+            symptoms: document.getElementById('symptoms').value,
+        };
+
+        formContainer.style.display = 'none';
+        loadingSpinner.style.display = 'block';
+        
+        try {
+            const systemPrompt = 'You are an expert medical AI... Your response MUST be a valid JSON object with four keys: "predicted_illness", "urgency", "specialist", "explanation". Urgency must be one of: \'Low\', \'Medium\', \'High\', \'Immediate\'.';
+            const userPrompt = `Patient: ${patientInfoCache.age}, ${patientInfoCache.gender}. Location: Kapriwas, Haryana, India. Symptoms: "${patientInfoCache.symptoms}". Provide analysis in JSON format.`;
+
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    "predicted_illness": { "type": "STRING" }, "urgency": { "type": "STRING" },
+                    "specialist": { "type": "STRING" }, "explanation": { "type": "STRING" }
+                },
+                required: ["predicted_illness", "urgency", "specialist", "explanation"]
+            };
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { responseMimeType: "application/json", responseSchema: schema }
+            };
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error?.message || 'API error');
+
+            const responseText = result.candidates[0].content.parts[0].text;
+            aiAnalysisCache = JSON.parse(responseText); // Cache AI analysis for submission
+            displayResults(aiAnalysisCache);
+
+        } catch (error) {
+            console.error('Error getting AI assessment:', error);
+            displayError('An error occurred: ' + error.message);
+            formContainer.style.display = 'block';
+        } finally {
+            loadingSpinner.style.display = 'none';
+        }
+    }
+
+    /**
+     * NEW: Handles submitting the cached data to the backend to create a consultation.
+     */
+    async function handleSubmitToDoctor() {
+        submitToDoctorBtn.disabled = true;
+        submitToDoctorBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Submitting...';
+
+        try {
+            const response = await fetch('/submit_ai_consultation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    patient_info: patientInfoCache,
+                    ai_analysis: aiAnalysisCache
+                })
+            });
+
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Server error during submission.');
+
+            // Show success message and redirect the user
+            resultContainer.style.display = 'none';
+            submissionFeedback.style.display = 'block';
+            submissionFeedback.innerHTML = `<div class="alert alert-success"><h3>Submitted Successfully!</h3><p>Your case is now with our medical team. Redirecting you to your dashboard...</p></div>`;
+            
+            setTimeout(() => {
+                window.location.href = "{{ url_for('patient_dashboard') }}";
+            }, 3000);
+
+        } catch (error) {
+            console.error('Error submitting to doctor:', error);
+            // Display the error inside the results card for better visibility
+            displayError('Failed to submit consultation: ' + error.message);
+            submitToDoctorBtn.disabled = false;
+            submitToDoctorBtn.textContent = 'Submit for Doctor Review';
+        }
+    }
+
+    /**
+     * Renders the AI analysis results on the page.
+     */
+    function displayResults(analysis) {
+        document.getElementById('result-illness').textContent = analysis.predicted_illness || 'N/A';
+        const urgencyEl = document.getElementById('result-urgency');
+        urgencyEl.textContent = analysis.urgency || 'N/A';
+        urgencyEl.className = 'urgency-' + (analysis.urgency || '');
+        document.getElementById('result-specialist').textContent = analysis.specialist || 'N/A';
+        document.getElementById('result-explanation').textContent = analysis.explanation || 'N/A';
+        resultContainer.style.display = 'block';
+    }
+
+    /**
+     * Displays an error message to the user.
+     */
+    function displayError(message) {
+        errorMessageDiv.textContent = message;
+        errorMessageDiv.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,98 @@
+{% extends "layout.html" %}
+{% block title %}Government Schemes{% endblock %}
+
+{% block content %}
+<style>
+    /* Custom styles for the scheme cards to make them stand out */
+    .scheme-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        background-color: #ffffff;
+    }
+    .scheme-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .scheme-card .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+</style>
+
+<div class="container page-container">
+    <div class="section-header">
+        <h2>Government Health Schemes</h2>
+        <p>Information on key government programs to support rural health and wellness.</p>
+    </div>
+
+    <div class="row" style="margin-top: 2rem;">
+        <!-- Ayushman Bharat (PM-JAY) -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 scheme-card">
+                <div class="card-body">
+                    <h5 class="card-title">Ayushman Bharat (PM-JAY)</h5>
+                    <p class="card-text">Free health insurance up to ₹5 lakh per family, especially benefiting rural poor households.</p>
+                    <a href="https://pmjay.gov.in/" class="btn btn-primary mt-auto" target="_blank" rel="noopener noreferrer">Link To Official Site</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- PMGSY -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 scheme-card">
+                <div class="card-body">
+                    <h5 class="card-title">Pradhan Mantri Gram Sadak Yojana (PMGSY)</h5>
+                    <p class="card-text">Focuses on rural road connectivity, improving access to hospitals and health services.</p>
+                    <a href="https://pmgsy.nic.in/" class="btn btn-primary mt-auto" target="_blank" rel="noopener noreferrer">Link To Official Site</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- PMMVY -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 scheme-card">
+                <div class="card-body">
+                    <h5 class="card-title">Pradhan Mantri Matru Vandana Yojana (PMMVY)</h5>
+                    <p class="card-text">A maternity benefit scheme providing financial support to mothers for nutrition and safe delivery.</p>
+                    <a href="https://pmmvy.wcd.gov.in/Home/" class="btn btn-primary mt-auto" target="_blank" rel="noopener noreferrer">Link To Official Site</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Swachh Bharat Mission -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 scheme-card">
+                <div class="card-body">
+                    <h5 class="card-title">Swachh Bharat Mission – Gramin (SBM-G)</h5>
+                    <p class="card-text">Promotes rural sanitation and hygiene, preventing diseases through open-defecation free villages.</p>
+                    <a href="https://swachhbharatmission.gov.in/sbmcms/index.htm" class="btn btn-primary mt-auto" target="_blank" rel="noopener noreferrer">Link To Official Site</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deen Dayal Antyodaya Yojana -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 scheme-card">
+                <div class="card-body">
+                    <h5 class="card-title">Deen Dayal Antyodaya Yojana – NRLM</h5>
+                    <p class="card-text">Empowers rural women through self-help groups, indirectly improving income and health awareness.</p>
+                    <a href="https://nrlm.gov.in/" class="btn btn-primary mt-auto" target="_blank" rel="noopener noreferrer">Link To Official Site</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RBSK -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100 scheme-card">
+                <div class="card-body">
+                    <h5 class="card-title">Rashtriya Bal Swasthya Karyakram (RBSK)</h5>
+                    <p class="card-text">Free health screening for children (0–18 years), focusing on birth defects and deficiencies.</p>
+                    <a href="https://rbsk.mohfw.gov.in/RBSK/" class="btn btn-primary mt-auto" target="_blank" rel="noopener noreferrer">Link To Official Site</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

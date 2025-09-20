@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block title %}ASHA Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Welcome, ASHA Worker!</h1>
+    <p>This is your dashboard. You can access tools to manage community health, track households, and submit reports.</p>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title">Household Management</h5>
+                    <p class="card-text">View and manage households and their members in your assigned area.</p>
+                    <a href="{{ url_for('asha_household_list') }}" class="btn btn-primary mt-auto">Go to Households</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title">Maternal & Child Health</h5>
+                    <p class="card-text">Track pregnancies, manage immunization schedules, and monitor child growth.</p>
+                    <a href="{{ url_for('asha_mch') }}" class="btn btn-info mt-auto">MCH Portal</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title">Reporting & Incentives</h5>
+                    <p class="card-text">Submit digital forms for health events and track your performance-based incentives.</p>
+                    <a href="{{ url_for('asha_reporting') }}" class="btn btn-success mt-auto">View Reports</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

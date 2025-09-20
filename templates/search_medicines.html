@@ -1,0 +1,201 @@
+{% extends "layout.html" %}
+{% block title %}Search Medicines{% endblock %}
+
+{% block content %}
+<style>
+    .medicine-search-container {
+        max-width: 800px;
+        margin: auto;
+    }
+    #loading-spinner, #results-container {
+        display: none; /* Hidden by default */
+    }
+    .pharmacy-card {
+        background-color: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: box-shadow 0.2s ease-in-out;
+    }
+    .pharmacy-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .pharmacy-card h5 {
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+    }
+    .pharmacy-card h5 i {
+        margin-right: 0.75rem;
+    }
+    .pharmacy-card p {
+        margin-bottom: 0.25rem;
+        color: #495057;
+    }
+    .disclaimer-box {
+        background-color: #fff3cd;
+        border-left: 5px solid #ffc107;
+        padding: 1rem;
+        margin-top: 2rem;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="container page-container medicine-search-container">
+    <div class="section-header">
+        <h2>Search for Medicines</h2>
+        <p>Enter your local pincode and the medicine you need to find nearby pharmacies.</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="content-box" id="search-form-container">
+        <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+        <form id="medicine-search-form">
+            <div class="mb-3">
+                <label for="pincode" class="form-label">Your 6-Digit Pincode</label>
+                <input type="text" class="form-control" id="pincode" name="pincode" pattern="[0-9]{6}" title="Please enter a valid 6-digit Indian pincode" placeholder="e.g., 122001" required>
+            </div>
+            <div class="mb-3">
+                <label for="medicine" class="form-label">Medicine Name</label>
+                <input type="text" class="form-control" id="medicine" name="medicine" placeholder="e.g., Paracetamol, Crocin" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="fas fa-search"></i> Search Availability
+            </button>
+        </form>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="text-center py-5">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Searching for pharmacies near you...</p>
+    </div>
+
+    <!-- Results Container -->
+    <div id="results-container">
+        <h3 id="results-header"></h3>
+        <div id="pharmacy-list"></div>
+        <div class="disclaimer-box">
+            <p class="mb-0">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong> This is an AI-generated list based on its training data. Medicine availability is not guaranteed. Please call the pharmacy to confirm stock before visiting.
+            </p>
+        </div>
+        <div class="text-center mt-4">
+             <button id="start-new-search-btn" class="btn btn-secondary">Start New Search</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- API Configuration ---
+    const API_KEY = "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"; 
+    const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+
+    const searchFormContainer = document.getElementById('search-form-container');
+    const searchForm = document.getElementById('medicine-search-form');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const resultsContainer = document.getElementById('results-container');
+    const resultsHeader = document.getElementById('results-header');
+    const pharmacyList = document.getElementById('pharmacy-list');
+    const errorMessageDiv = document.getElementById('error-message');
+    const newSearchBtn = document.getElementById('start-new-search-btn');
+
+    searchForm.addEventListener('submit', handleSearch);
+    newSearchBtn.addEventListener('click', () => {
+        resultsContainer.style.display = 'none';
+        searchFormContainer.style.display = 'block';
+        searchForm.reset();
+    });
+
+    async function handleSearch(event) {
+        event.preventDefault();
+        errorMessageDiv.style.display = 'none';
+        
+        const pincode = document.getElementById('pincode').value;
+        const medicine = document.getElementById('medicine').value;
+
+        searchFormContainer.style.display = 'none';
+        loadingSpinner.style.display = 'block';
+        
+        try {
+            const systemPrompt = "You are a helpful pharmacy assistant. Your task is to find pharmacies near a given Indian pincode that are likely to stock a specific medicine, based on your training data. Your response must be a valid JSON object. The JSON object should have a single key named 'pharmacies'. The value should be an array of objects, where each object represents a pharmacy and has the following keys: 'name', 'address', and 'phone_number'. If you cannot find any pharmacies or phone numbers, return an empty array or null for the phone number.";
+            const userPrompt = `Please find pharmacies near the pincode ${pincode} in India that sell the medicine "${medicine}". Provide their name, address, and phone number based on your knowledge.`;
+            
+            const payload = {
+                // FIX: Switched to a valid and reliable free model ID
+                model: "mistralai/mistral-7b-instruct:free",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: userPrompt }
+                ],
+                response_format: { "type": "json_object" }
+            };
+
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error?.message || `API Error: ${response.statusText}`);
+            }
+
+            const responseText = result.choices[0].message.content;
+            const data = JSON.parse(responseText);
+            displayResults(data.pharmacies, medicine, pincode);
+
+        } catch (error) {
+            console.error('Error searching for pharmacies:', error);
+            displayError(`An error occurred: ${error.message}. Please check your connection and try again.`);
+            searchFormContainer.style.display = 'block';
+        } finally {
+            loadingSpinner.style.display = 'none';
+        }
+    }
+
+    function displayResults(pharmacies, medicine, pincode) {
+        pharmacyList.innerHTML = '';
+        resultsHeader.textContent = `Pharmacies near ${pincode} for "${medicine}"`;
+
+        if (pharmacies && pharmacies.length > 0) {
+            pharmacies.forEach(pharmacy => {
+                const card = document.createElement('div');
+                card.className = 'pharmacy-card';
+                
+                let phoneHtml = '<p><i class="fas fa-phone-slash"></i> Phone not found</p>';
+                if (pharmacy.phone_number) {
+                    phoneHtml = `<p><i class="fas fa-phone"></i> <a href="tel:${pharmacy.phone_number}">${pharmacy.phone_number}</a></p>`;
+                }
+
+                card.innerHTML = `
+                    <h5><i class="fas fa-clinic-medical"></i>${pharmacy.name || 'Name not available'}</h5>
+                    <p><i class="fas fa-map-marker-alt"></i> ${pharmacy.address || 'Address not available'}</p>
+                    ${phoneHtml}
+                `;
+                pharmacyList.appendChild(card);
+            });
+        } else {
+            pharmacyList.innerHTML = `<p class="text-center">No pharmacies could be found for "${medicine}" near your pincode. Please try a different medicine or pincode.</p>`;
+        }
+        
+        resultsContainer.style.display = 'block';
+    }
+
+    function displayError(message) {
+        errorMessageDiv.textContent = message;
+        errorMessageDiv.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}
+

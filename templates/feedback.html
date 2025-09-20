@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}Feedback{% endblock %}
+{% block content %}
+<div class="container page-container">
+    <div class="section-header">
+        <h2>Submit Feedback</h2>
+        <p>Your feedback helps us improve ArogHub for everyone.</p>
+    </div>
+    <div class="content-box">
+        <form>
+            <div class="form-group">
+                <label for="feedback_type">Feedback Category</label>
+                <select id="feedback_type">
+                    <option>General Comment</option>
+                    <option>Bug Report</option>
+                    <option>Feature Request</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="feedback_text">Your Feedback</label>
+                <textarea id="feedback_text" rows="8" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

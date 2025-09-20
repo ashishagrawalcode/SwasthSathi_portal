@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block title %}About Doctor Portal{% endblock %}
+
+{% block content %}
+<style>
+    /* These styles create the clean, modern "home page" look for the feature grid. */
+    .feature-grid .card {
+        border: none;
+        background-color: #ffffff;
+        border-radius: 15px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        text-align: center;
+        padding: 2rem 1rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .feature-grid .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .feature-grid .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #198754; /* A green color for the doctor portal */
+    }
+    .feature-grid .card-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<div class="container page-container">
+    <div class="section-header">
+        <h2>About the ArogHub Doctor Portal</h2>
+        <p>A smart, efficient way to manage your practice and patient care.</p>
+    </div>
+
+    <div class="content-box" style="margin-top: 2rem;">
+        <h3 class="text-center">Your Professional Toolkit</h3>
+        <p class="text-center">Access powerful features designed to streamline your workflow.</p>
+        
+        <div class="row feature-grid justify-content-center" style="margin-top: 2.5rem;">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
+                        <h5 class="card-title">Manage Your Schedule</h5>
+                        <p class="card-text">View and organize all your patient appointments in one place.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-history"></i></div>
+                        <h5 class="card-title">View Patient History</h5>
+                        <p class="card-text">Access complete medical histories before your consultations.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-video"></i></div>
+                        <h5 class="card-title">Live Consultation</h5>
+                        <p class="card-text">Engage with patients through secure, high-quality video calls.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-file-prescription"></i></div>
+                        <h5 class="card-title">E-Prescriptions</h5>
+                        <p class="card-text">Generate and send digital prescriptions to patients instantly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

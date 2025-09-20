@@ -1,0 +1,204 @@
+{% extends "layout.html" %}
+{% block title %}AI Wellness Chat{% endblock %}
+
+{% block content %}
+<style>
+    /* Modern Chat Interface Styles */
+    .chat-page-container {
+        max-width: 800px;
+        margin: auto;
+    }
+    .chat-box {
+        height: 65vh;
+        overflow-y: auto;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background-color: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .message {
+        padding: 12px 18px;
+        border-radius: 20px;
+        max-width: 80%;
+        word-wrap: break-word;
+        line-height: 1.5;
+    }
+    .bot-message {
+        background-color: #e9ecef;
+        color: #212529;
+        align-self: flex-start;
+        border-bottom-left-radius: 5px;
+    }
+    .user-message {
+        background-color: #0d6efd;
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 5px;
+    }
+    /* Typing indicator for the bot */
+    .typing-indicator span {
+        height: 8px;
+        width: 8px;
+        background-color: #6c757d;
+        border-radius: 50%;
+        display: inline-block;
+        animation: bounce 1.4s infinite ease-in-out both;
+    }
+    .typing-indicator span:nth-of-type(2) { animation-delay: -0.32s; }
+    .typing-indicator span:nth-of-type(3) { animation-delay: -0.16s; }
+    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+    
+    .chat-input-form .form-control {
+        border-radius: 25px 0 0 25px;
+        border-right: none;
+    }
+    .chat-input-form .btn {
+        border-radius: 0 25px 25px 0;
+    }
+</style>
+
+<div class="container page-container chat-page-container">
+    <div class="section-header text-center mb-4">
+        <h2>AI Wellness Assistant</h2>
+        <p class="text-muted">A safe space to talk about your well-being. How are you feeling today?</p>
+    </div>
+
+    <div class="chat-box" id="chat-messages">
+        <!-- Initial welcome message from the bot -->
+        <div class="message bot-message">
+            Hello, {{ session.user_name }}! I'm Aroghub AI, your wellness assistant. Please feel free to share what's on your mind. I'm here to listen.
+        </div>
+    </div>
+    
+    <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+
+    <form id="chat-form" class="chat-input-form">
+        <div class="input-group">
+            <input type="text" id="userInput" class="form-control" placeholder="Tell me what's on your mind..." autocomplete="off">
+            <button class="btn btn-primary" type="submit" id="sendButton">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const chatMessages = document.getElementById("chat-messages");
+    const inputElement = document.getElementById("userInput");
+    const sendButton = document.getElementById("sendButton");
+    const chatForm = document.getElementById("chat-form");
+    const errorMessageDiv = document.getElementById('error-message');
+
+    // --- API Configuration for the AI Wellness Chat ---
+    const API_KEY = "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";
+    const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+    
+    let conversationHistory = [];
+
+    function appendMessage(content, sender) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${sender}-message`;
+        messageDiv.textContent = content;
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        const indicatorDiv = document.createElement('div');
+        indicatorDiv.className = 'message bot-message';
+        indicatorDiv.id = 'typing-indicator';
+        indicatorDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+        chatMessages.appendChild(indicatorDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if (indicator) indicator.remove();
+    }
+
+    function displayError(message) {
+        errorMessageDiv.textContent = message;
+        errorMessageDiv.style.display = 'block';
+    }
+
+    async function sendMessage(event) {
+        event.preventDefault();
+        errorMessageDiv.style.display = 'none';
+        const userMessage = inputElement.value.trim();
+        if (!userMessage) return;
+
+        appendMessage(userMessage, 'user');
+        inputElement.value = "";
+        sendButton.disabled = true;
+
+        conversationHistory.push({ role: "user", content: userMessage });
+        showTypingIndicator();
+
+        try {
+            const systemPrompt = "You are Aroghub AI, an empathetic and supportive wellness assistant. Your primary goal is to provide a safe, non-judgmental space for users to discuss their feelings, stress, and mental well-being. You are not a doctor and cannot give medical advice, diagnoses, or prescriptions. Instead, you should listen, offer supportive statements, and suggest general wellness strategies like mindfulness, breathing exercises, or talking to a friend. If the user mentions severe distress or self-harm, you must gently but clearly advise them to seek help from a qualified healthcare professional or a crisis hotline immediately.";
+
+            const payload = {
+                // FIX: Switched to a valid and reliable free model
+                model: "mistralai/mistral-7b-instruct:free",
+                messages: [
+                    { role: "system", content: systemPrompt },
+                    ...conversationHistory
+                ]
+            };
+
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${API_KEY}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || `API error: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            const botResponse = data.choices[0].message.content;
+
+            conversationHistory.push({ role: "assistant", content: botResponse });
+            removeTypingIndicator();
+            appendMessage(botResponse, 'bot');
+
+        } catch (error) {
+            console.error("Error:", error);
+            removeTypingIndicator();
+            displayError("Sorry, I'm having trouble connecting right now. Please try again later. " + error.message);
+        } finally {
+            sendButton.disabled = false;
+            inputElement.focus();
+        }
+    }
+
+    chatForm.addEventListener('submit', sendMessage);
+});
+</script>
+{% endblock %}
+```
+
+### 2. How to Use This New File
+
+To make sure you can access this new page, you will need to add a simple route to your main **`app.py`** file. This will create the `/ai-wellness` link in your application.
+
+Please add the following code block to your `app.py` file, for instance, near the other patient feature routes:
+
+```python
+@app.route('/ai-wellness')
+@login_required(role_ids=[ROLES['patient'], ROLES['doctor'], ROLES['asha']])
+def ai_wellness_chat():
+    """Renders the AI Wellness Chat interface."""
+    return render_template('ai_wellness_chat.html')
+

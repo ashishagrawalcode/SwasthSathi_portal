@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+    <div class="section-header">
+        <h2>Doctor Dashboard</h2>
+        <p>Welcome, {{ session.user_name }}! Here are the new patient cases requiring your attention.</p>
+    </div>
+
+    <div class="content-box">
+        <h4>Pending Consultations</h4>
+        {% if cases %}
+            <div class="list-group" style="margin-top: 1.5rem;">
+                {% for case in cases %}
+                    <a href="{{ url_for('view_consultation', case_id=case.id) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Case #{{ case.id }} - {{ case.patient_name }}</h5>
+                            <small>Submitted: {{ case.created_at[:10] }}</small>
+                        </div>
+                        <p class="mb-1"><strong>Symptoms:</strong> {{ case.symptoms[:100] }}{% if case.symptoms|length > 100 %}...{% endif %}</p>
+                        <small>Category: {{ case.category }}</small>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted" style="margin-top: 1.5rem;">There are no pending cases at the moment.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

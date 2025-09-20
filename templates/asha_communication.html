@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title %}ASHA Communication Hub{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Communication & Information Hub</h1>
+        <a href="{{ url_for('asha_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title">Educational Resources</h5>
+                    <p class="card-text">Access a library of videos, guides, and health information to empower your community.</p>
+                    <a href="{{ url_for('asha_educational_resources') }}" class="btn btn-primary mt-auto">Go to Library</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center d-flex flex-column">
+                    <h5 class="card-title">Direct Communication</h5>
+                    <p class="card-text">Send messages to supervisors, doctors, or other health workers for guidance.</p>
+                    <a href="{{ url_for('asha_direct_chat') }}" class="btn btn-info mt-auto">Open Chat</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h3>Alerts & Notifications</h3>
+        <ul class="list-group">
+            {% for alert in alerts %}
+            <li class="list-group-item list-group-item-{{ alert.type }}">
+                <strong>{{ alert.title }}</strong>: {{ alert.message }}
+                <span class="float-end text-muted">{{ alert.date }}</span>
+            </li>
+            {% else %}
+            <li class="list-group-item text-center">No new alerts or notifications.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

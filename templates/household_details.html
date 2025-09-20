@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Household Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+        .detail-item strong {
+            color: #555;
+        }
+        .detail-item span {
+            color: #000;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .back-link:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            text-align: center;
+            color: red;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Household Details</h1>
+
+        {% if household %}
+            <div class="detail-item">
+                <strong>Household ID:</strong>
+                <span>{{ household.id }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>Household Name:</strong>
+                <span>{{ household.household_name }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>Address:</strong>
+                <span>{{ household.address }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>Number of Members:</strong>
+                <span>{{ household.members_count }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>Verified:</strong>
+                <span>{{ 'Yes' if household.is_verified else 'No' }}</span>
+            </div>
+        {% else %}
+            <p class="error-message">Household details not found.</p>
+        {% endif %}
+
+        <a href="{{ url_for('asha_household_list') }}" class="back-link">Back to Household List</a>
+    </div>
+</body>
+</html>

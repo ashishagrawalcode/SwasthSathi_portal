@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}Pregnancy Tracking{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Pregnancy Tracking</h1>
+        <a href="{{ url_for('asha_mch') }}" class="btn btn-secondary">Back to MCH Portal</a>
+    </div>
+    
+    <div class="row">
+        {% for pregnancy in pregnancies %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ pregnancy.patient_name }}</h5>
+                    <p class="card-text"><strong>Expected Delivery Date:</strong> {{ pregnancy.edd }}</p>
+                    <p class="card-text"><strong>ANC Visits Completed:</strong> {{ pregnancy.anc_visits_completed }}</p>
+                    <p class="card-text"><strong>Status:</strong> <span class="badge bg-{{ pregnancy.status_class }}">{{ pregnancy.status }}</span></p>
+                    <a href="#" class="btn btn-sm btn-primary">View Details</a>
+                    <a href="#" class="btn btn-sm btn-outline-success">Log ANC Visit</a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center">
+            <div class="alert alert-info">No pregnant women found.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

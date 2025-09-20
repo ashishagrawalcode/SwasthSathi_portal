@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block title %}Patient Case History{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+    <div class="section-header">
+        <h2>Patient Case History</h2>
+        <p>A log of all previously reviewed consultation cases.</p>
+    </div>
+
+    <div class="content-box">
+        {% if cases %}
+            <div class="list-group" style="margin-top: 1.5rem;">
+                {% for case in cases %}
+                    <div class="list-group-item">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Case #{{ case.id }} - {{ case.patient_name }}</h5>
+                            <small>Reviewed: {{ case.created_at[:10] }}</small>
+                        </div>
+                        <p class="mb-1"><strong>Symptoms:</strong> {{ case.symptoms }}</p>
+                        <p class="mb-1"><strong>Your Response:</strong> {{ case.doctor_response }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted" style="margin-top: 1.5rem;">There is no history of reviewed cases yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

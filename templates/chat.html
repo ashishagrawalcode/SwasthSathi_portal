@@ -1,0 +1,284 @@
+{% extends "layout.html" %}
+{% block title %}Chat with {{ other_user.name }}{% endblock %}
+
+{% block content %}
+<style>
+    /* General Chat Styles */
+    .chat-container { max-width: 800px; margin: auto; }
+    .chat-messages { height: 60vh; overflow-y: auto; padding: 1rem; border: 1px solid #ddd; background-color: #f8f9fa; border-radius: 5px; }
+    .message { margin-bottom: 1rem; display: flex; flex-direction: column; }
+    .message p { padding: 0.5rem 1rem; border-radius: 15px; margin-bottom: 0.25rem; max-width: 75%; word-wrap: break-word; }
+    .message.sent { align-items: flex-end; }
+    .message.sent p { background-color: #0d6efd; color: white; }
+    .message.received { align-items: flex-start; }
+    .message.received p { background-color: #e9ecef; }
+    .message .timestamp { font-size: 0.75rem; color: #6c757d; }
+    .message.sent .timestamp { align-self: flex-end; }
+    .chat-input-area { display: flex; margin-top: 1rem; }
+    .message audio { max-width: 100%; }
+
+    /* Style for the recording button */
+    #voice-record-btn.recording {
+        background-color: #dc3545;
+        color: white;
+        animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+</style>
+
+<div class="container page-container chat-container">
+    <div class="section-header">
+        <h2>Chat with {{ other_user.name }}</h2>
+    </div>
+
+    <div class="content-box">
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages loaded here -->
+        </div>
+
+        <form id="message-form" class="chat-input-area">
+            <button type="button" id="start-video-call-btn" class="btn btn-success me-2" title="Start Video Call">
+                <i class="fas fa-video"></i>
+            </button>
+            
+            <input type="file" id="file-input" name="file" style="display: none;">
+            <button type="button" id="attach-file-btn" class="btn btn-secondary me-2" title="Attach File"><i class="fas fa-paperclip"></i></button>
+
+            <button type="button" id="voice-record-btn" class="btn btn-secondary me-2" title="Record Voice Message">
+                <i class="fas fa-microphone"></i>
+            </button>
+            
+            <input type="text" id="message-text-input" class="form-control" placeholder="Type a message...">
+            <button type="submit" id="send-btn" class="btn btn-primary ms-2" title="Send Message"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+</div>
+
+<!-- Video Call Modal -->
+<div id="video-call-container" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1050; justify-content:center; align-items:center;">
+    <div id="video-wrapper" style="position:relative; width:80vw; max-width:1200px;">
+        <div id="videos" style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+            <video id="local-video" autoplay muted style="width:100%; transform:scaleX(-1);"></video>
+            <video id="remote-video" autoplay style="width:100%;"></video>
+        </div>
+        <div id="video-controls" style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%);">
+            <button id="hang-up-btn" style="background-color:#dc3545; color:white; border:none; width:50px; height:50px; border-radius:50%;"><i class="fas fa-phone-slash"></i></button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Element References ---
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageForm = document.getElementById('message-form');
+    const messageTextInput = document.getElementById('message-text-input');
+    const startVideoCallBtn = document.getElementById('start-video-call-btn');
+    
+    // FIX: Add references for attachment and voice buttons
+    const attachFileBtn = document.getElementById('attach-file-btn');
+    const fileInput = document.getElementById('file-input');
+    const voiceRecordBtn = document.getElementById('voice-record-btn');
+
+    // --- State Variables ---
+    const THREAD_ID = {{ thread.id | tojson }};
+    const CURRENT_USER_ID = {{ session.user_id | tojson }};
+    const OTHER_USER_ID = {{ other_user.id | tojson }};
+    let peer, localStream, currentCall;
+    const PEER_ROOM_ID_PREFIX = `swasthsathi-videocall-thread-${THREAD_ID}`;
+    
+    // FIX: Add state for voice recording
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+
+    // --- Core Chat Functions ---
+    function sanitizeHTML(text) {
+        const tempDiv = document.createElement('div');
+        tempDiv.textContent = text;
+        return tempDiv.innerHTML.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+    }
+
+    function displayMessage(msg) {
+        const messageDiv = document.createElement('div');
+        const isSent = msg.sender_id === CURRENT_USER_ID;
+        messageDiv.classList.add('message', isSent ? 'sent' : 'received');
+
+        let content = '';
+        if (msg.message_text) {
+            content += `<p>${sanitizeHTML(msg.message_text)}</p>`;
+        }
+        if (msg.file_path) {
+            // Check if it's an audio file to render a player
+            if (['.wav', '.mp3', '.m4a', '.webm'].some(ext => msg.file_path.toLowerCase().endsWith(ext))) {
+                content += `<audio controls src="/static/${msg.file_path}"></audio>`;
+            } else {
+                content += `<p><a href="/static/${msg.file_path}" target="_blank">View Attached File</a></p>`;
+            }
+        }
+        
+        const timestamp = new Date(msg.sent_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        content += `<span class="timestamp">${timestamp}</span>`;
+        
+        messageDiv.innerHTML = content;
+        messagesContainer.appendChild(messageDiv);
+    }
+    
+    async function fetchMessages() {
+        try {
+            const response = await fetch(`/chat/${THREAD_ID}/messages`);
+            const messages = await response.json();
+            messagesContainer.innerHTML = '';
+            messages.forEach(displayMessage);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } catch (error) {
+            console.error('Failed to fetch messages:', error);
+        }
+    }
+
+    // FIX: Updated sendMessage to handle file uploads
+    async function sendMessage(event) {
+        event.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('message_text', messageTextInput.value);
+        if (fileInput.files.length > 0) {
+            formData.append('file', fileInput.files[0]);
+        }
+
+        if (messageTextInput.value.trim() === '' && fileInput.files.length === 0) {
+            return; // Don't send empty messages
+        }
+        
+        await fetch(`/chat/${THREAD_ID}/send`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        messageTextInput.value = '';
+        fileInput.value = ''; // Clear the file input
+        fetchMessages();
+    }
+
+    // --- FIX: Added Voice Message Logic ---
+    voiceRecordBtn.addEventListener('click', async () => {
+        if (!isRecording) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                isRecording = true;
+                voiceRecordBtn.classList.add('recording');
+                voiceRecordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioFile = new File([audioBlob], `voice_note_${Date.now()}.webm`, { type: 'audio/webm' });
+
+                    const formData = new FormData();
+                    formData.append('file', audioFile);
+
+                    await fetch(`/chat/${THREAD_ID}/send`, {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    fetchMessages();
+                };
+
+                mediaRecorder.start();
+            } catch (err) {
+                console.error("Microphone access error:", err);
+                alert("Please allow microphone access to use this feature.");
+            }
+        } else {
+            mediaRecorder.stop();
+            isRecording = false;
+            voiceRecordBtn.classList.remove('recording');
+            voiceRecordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        }
+    });
+
+    // --- PeerJS Video Call Logic (remains the same) ---
+    function initializePeer() {
+        const peerId = `${PEER_ROOM_ID_PREFIX}-${CURRENT_USER_ID}`;
+        peer = new Peer(peerId, { host: 'peerjs.eceder.com', port: 443, path: '/', secure: true });
+        peer.on('call', incomingCall => {
+            if (confirm("You have an incoming video call. Answer?")) {
+                 navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                    .then(stream => {
+                        localStream = stream;
+                        document.getElementById('local-video').srcObject = stream;
+                        incomingCall.answer(stream);
+                        setupCall(incomingCall);
+                    }).catch(err => console.error('Failed to get local stream:', err));
+            } else {
+                incomingCall.close();
+            }
+        });
+        peer.on('open', id => console.log('My PeerJS ID is: ' + id));
+        peer.on('error', err => console.error('PeerJS error:', err));
+    }
+
+    function setupCall(call) {
+        currentCall = call;
+        document.getElementById('video-call-container').style.display = 'flex';
+        call.on('stream', remoteStream => {
+            document.getElementById('remote-video').srcObject = remoteStream;
+        });
+        call.on('close', hangUpCall);
+    }
+    
+    function startCall() {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                localStream = stream;
+                document.getElementById('local-video').srcObject = stream;
+                const remotePeerId = `${PEER_ROOM_ID_PREFIX}-${OTHER_USER_ID}`;
+                const call = peer.call(remotePeerId, stream);
+                setupCall(call);
+                sendMessageAsNotification("I have started a video call. Please check for the call prompt.");
+            }).catch(err => {
+                console.error('Failed to get local stream:', err);
+                alert('Could not start video call. Please allow camera and microphone access.');
+            });
+    }
+
+    function hangUpCall() {
+        if (currentCall) currentCall.close();
+        if (localStream) localStream.getTracks().forEach(track => track.stop());
+        document.getElementById('video-call-container').style.display = 'none';
+        currentCall = null;
+        localStream = null;
+    }
+
+    async function sendMessageAsNotification(text) {
+        const formData = new FormData();
+        formData.append('message_text', text);
+        await fetch(`/chat/${THREAD_ID}/send`, { method: 'POST', body: formData });
+        fetchMessages();
+    }
+
+    // --- Event Listeners ---
+    messageForm.addEventListener('submit', sendMessage);
+    startVideoCallBtn.addEventListener('click', startCall);
+    document.getElementById('hang-up-btn').addEventListener('click', hangUpCall);
+    // FIX: Add event listener for the attachment button
+    attachFileBtn.addEventListener('click', () => fileInput.click());
+    
+    // --- Initial Load ---
+    fetchMessages();
+    initializePeer();
+    setInterval(fetchMessages, 5000);
+});
+</script>
+{% endblock %}
+

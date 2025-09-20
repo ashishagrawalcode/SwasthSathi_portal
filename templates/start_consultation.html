@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block title %}Start Consultation{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+    <div class="section-header">
+        <h2>Start Your Consultation</h2>
+        <p>You are about to begin a session with <strong>{{ doctor.name }}</strong> ({{ doctor.specialty }}).</p>
+    </div>
+
+    <form class="consultation-wrapper" action="" method="POST" id="consultation-form">
+        <div class="consultation-options">
+            <h3>Choose your consultation type:</h3>
+            
+            <div class="option-card" data-type="video" data-price="800">
+                <div class="option-icon"><i class="fas fa-video"></i></div>
+                <div class="option-details">
+                    <h4>Video Call + Chat</h4>
+                    <p>Face-to-face interaction with the doctor.</p>
+                </div>
+                <div class="option-price">₹800</div>
+            </div>
+
+            <div class="option-card" data-type="audio" data-price="600">
+                <div class="option-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="option-details">
+                    <h4>Audio Call + Chat</h4>
+                    <p>Voice-only call for your convenience.</p>
+                </div>
+                <div class="option-price">₹600</div>
+            </div>
+        </div>
+        
+        <div class="payment-summary hidden" id="payment-summary">
+    <h3>Summary</h3>
+    <div class="summary-line">
+        <span>Consultation Fee:</span>
+        <span id="fee">₹0</span>
+    </div>
+    <div class="summary-line total">
+        <span>Total Payable:</span>
+        <span id="total">₹0</span>
+    </div>
+    <button type="submit" class="btn btn-primary btn-full btn-lg" id="proceed-btn">Proceed</button>
+    </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block title %}About ASHA Portal{% endblock %}
+{% block content %}
+<style>
+    /* Styles for the feature grid */
+    .feature-grid .card { border: none; background-color: #ffffff; border-radius: 15px; transition: all 0.3s; text-align: center; padding: 2rem 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    .feature-grid .card:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .feature-grid .feature-icon { font-size: 3rem; margin-bottom: 1rem; color: #ff7f50; } /* Coral color for ASHA */
+</style>
+<div class="container page-container">
+    <div class="section-header">
+        <h2>About the ArogHub ASHA Portal</h2>
+        <p>Empowering community health workers with digital tools.</p>
+    </div>
+    <div class="content-box" style="margin-top: 2rem;">
+        <h3 class="text-center">Your Community Health Toolkit</h3>
+        <div class="row feature-grid justify-content-center" style="margin-top: 2.5rem;">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-house-user"></i></div>
+                        <h5 class="card-title">Community Directory</h5>
+                        <p class="card-text">Manage and view a directory of all households and members in your area.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-baby"></i></div>
+                        <h5 class="card-title">Beneficiary Tracking</h5>
+                        <p class="card-text">Track immunizations and health services for mothers and children.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="feature-icon"><i class="fas fa-clipboard-list"></i></div>
+                        <h5 class="card-title">Activity Log</h5>
+                        <p class="card-text">Keep a digital diary of your daily visits, meetings, and tasks.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,263 @@
+{% extends "layout.html" %}
+{% block title %}AI Wellness Chat{% endblock %}
+
+{% block content %}
+<style>
+    /* Chat Container */
+    .chat-container {
+        height: 500px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        background-color: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Chat Messages */
+    .chat-message {
+        padding: 12px 18px;
+        border-radius: 20px;
+        max-width: 75%;
+        word-wrap: break-word;
+        font-size: 1rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        display: inline-block; /* To allow alignment */
+    }
+
+    .chat-message.bot {
+        background-color: #e2eafc; /* Light blue */
+        color: #333;
+        align-self: flex-start;
+        border-bottom-left-radius: 5px;
+    }
+
+    .chat-message.user {
+        background-color: #007bff; /* Blue */
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 5px;
+    }
+
+    /* Message Timestamp */
+    .message-meta {
+        font-size: 0.75rem;
+        color: #888;
+        margin-top: 5px;
+        text-align: right;
+    }
+
+    /* Chat Form Input */
+    .input-group {
+        display: flex;
+        width: 100%;
+    }
+
+    .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right: none;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #004085;
+    }
+
+    .page-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    /* NEW CSS for voice chat */
+    .chat-message .voice-message-player {
+        width: 100%;
+    }
+    .chat-message.user .voice-message-player {
+        filter: invert(100%) grayscale(100%) brightness(200%); /* Make player white for user messages */
+    }
+</style>
+
+<div class="container page-container">
+    <div class="section-header text-center mb-4">
+        <h2>AI Wellness Assistant</h2>
+        <p class="text-muted">Ask me anything about your symptoms or general health questions.</p>
+    </div>
+
+    <div class="chat-container" id="chat-container">
+        <div class="chat-message bot">
+            <p>Hello, {{ session.user_name }}! How can I help you today?</p>
+        </div>
+        <div class="chat-message user">
+            <p>I have a sore throat and fever.</p>
+        </div>
+    </div>
+
+    <div id="chat-form-container">
+    <form id="chat-form" onsubmit="return false;">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Type your message here..." id="chat-input">
+            <div class="input-group-append">
+                <button class="btn btn-secondary" type="button" id="record-btn">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="btn btn-primary" type="submit" id="send-btn">Send</button>
+            </div>
+        </div>
+    </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatForm = document.getElementById('chat-form');
+        const chatInput = document.getElementById('chat-input');
+        const chatContainer = document.getElementById('chat-container');
+        // NEW: Voice chat elements
+        const recordBtn = document.getElementById('record-btn');
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        // NEW: Function to create a voice message element
+        function createVoiceMessageElement(audioBlob, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('chat-message', sender);
+
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audioElement = document.createElement('audio');
+            audioElement.controls = true;
+            audioElement.src = audioUrl;
+            audioElement.classList.add('voice-message-player');
+            
+            messageElement.appendChild(audioElement);
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Function to create and append a chat message to the UI
+        function createMessageElement(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('chat-message', sender);
+            const paragraph = document.createElement('p');
+            paragraph.textContent = message;
+            messageElement.appendChild(paragraph);
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight; // Auto-scroll to the bottom
+        }
+
+        // NEW: Handle voice recording button
+        recordBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    isRecording = true;
+                    recordBtn.innerHTML = '<i class="fas fa-stop-circle text-danger"></i>'; // Change icon to stop
+                    chatInput.placeholder = "Recording voice message...";
+                    chatInput.disabled = true;
+
+                    mediaRecorder.ondataavailable = (e) => {
+                        audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        audioChunks = [];
+                        
+                        // 1. Display the recorded voice message on the user's side
+                        createVoiceMessageElement(audioBlob, 'user');
+
+                        // 2. Send the voice message to the backend
+                        const formData = new FormData();
+                        formData.append('voice_message', audioBlob, 'voice_message.webm');
+
+                        try {
+                            const response = await fetch('/send_voice_message', {
+                                method: 'POST',
+                                body: formData
+                            });
+                            const data = await response.json();
+                            
+                            // 3. Handle the AI response (text) and add it to the UI
+                            if (data.status === 'success') {
+                                createMessageElement(data.response, 'bot');
+                            } else {
+                                createMessageElement('Sorry, something went wrong with the voice transcription.', 'bot');
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            createMessageElement('Unable to connect to the assistant.', 'bot');
+                        } finally {
+                             chatInput.disabled = false;
+                        }
+                    };
+
+                    mediaRecorder.start();
+
+                } catch (error) {
+                    console.error('Microphone access denied:', error);
+                    alert('Please allow microphone access to use voice messaging.');
+                }
+            } else {
+                // Stop recording
+                mediaRecorder.stop();
+                isRecording = false;
+                recordBtn.innerHTML = '<i class="fas fa-microphone"></i>'; // Change icon back to microphone
+                chatInput.placeholder = "Type your message here...";
+                chatInput.disabled = false;
+            }
+        });
+
+
+        // Handle form submission (when the user clicks "Send" or presses Enter)
+        chatForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevents the page from reloading
+            
+            const userMessage = chatInput.value.trim();
+            if (userMessage === '') {
+                return; // Do nothing if the input is empty
+            }
+
+            // 1. Add the user's message to the UI
+            createMessageElement(userMessage, 'user');
+            
+            // 2. Send the message to your Flask backend
+            fetch('/send_chat_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userMessage })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 3. Handle the AI response and add it to the UI
+                if (data.status === 'success') {
+                    createMessageElement(data.response, 'bot');
+                } else {
+                    createMessageElement('Sorry, something went wrong.', 'bot');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                createMessageElement('Unable to connect to the assistant.', 'bot');
+            });
+
+            // 4. Clear the input field
+            chatInput.value = '';
+        });
+    });
+</script>
+{% endblock %}

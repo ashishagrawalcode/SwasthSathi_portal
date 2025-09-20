@@ -1,0 +1,145 @@
+{% extends "layout.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .stat-card {
+        background-color: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .stat-card .stat-icon {
+        font-size: 2.5rem;
+        color: #0d6efd;
+        margin-bottom: 1rem;
+    }
+    .stat-card h4 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #212529;
+    }
+    .stat-card p {
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+    .content-box h4 {
+        border-bottom: 2px solid #0d6efd;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: #343a40;
+    }
+</style>
+
+<div class="container page-container">
+    <div class="section-header">
+        <h2>Super Admin Dashboard</h2>
+        <p>Welcome, {{ session.user_name }}! You have full system access to monitor public health data.</p>
+    </div>
+
+    <!-- Key Metrics Row -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <h4>1,280</h4>
+                <p>Total Patients</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-file-medical-alt"></i></div>
+                <h4>75</h4>
+                <p>Active Consultations</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-user-md"></i></div>
+                <h4>42</h4>
+                <p>Registered Doctors</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-heartbeat"></i></div>
+                <h4>112</h4>
+                <p>ASHA Workers</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="row mt-4">
+        <!-- Health Trends Column -->
+        <div class="col-md-8">
+            <div class="content-box">
+                <h4><i class="fas fa-chart-line"></i> Public Health Overview - Kapriwas Region</h4>
+                <p class="text-muted">Real-time summary of reported symptoms and illnesses from patient consultations in the last 7 days.</p>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Illness / Symptom</th>
+                                <th>Reported Cases</th>
+                                <th>Most Affected Area</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Viral Fever</td>
+                                <td>48</td>
+                                <td>Ward 5, Kapriwas</td>
+                                <td><i class="fas fa-arrow-up text-danger"></i> Increasing</td>
+                            </tr>
+                            <tr>
+                                <td>Stomach Infection</td>
+                                <td>22</td>
+                                <td>Near Main Market</td>
+                                <td><i class="fas fa-arrow-down text-success"></i> Decreasing</td>
+                            </tr>
+                            <tr>
+                                <td>Dengue-like Symptoms</td>
+                                <td>15</td>
+                                <td>Sector 2</td>
+                                <td><i class="fas fa-minus text-warning"></i> Stable</td>
+                            </tr>
+                            <tr>
+                                <td>Common Cold & Cough</td>
+                                <td>67</td>
+                                <td>All Wards</td>
+                                <td><i class="fas fa-arrow-up text-danger"></i> Increasing</td>
+                            </tr>
+                             <tr>
+                                <td>Skin Allergies</td>
+                                <td>9</td>
+                                <td>Industrial Area</td>
+                                <td><i class="fas fa-minus text-warning"></i> Stable</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Management Column -->
+        <div class="col-md-4">
+            <div class="content-box">
+                <h4><i class="fas fa-cogs"></i> System Management</h4>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action">Manage Doctor Accounts</a>
+                    <a href="#" class="list-group-item list-group-item-action">Manage ASHA Workers</a>
+                    <a href="#" class="list-group-item list-group-item-action">View All Consultation Records</a>
+                    <a href="#" class="list-group-item list-group-item-action">Generate Health Reports</a>
+                    <a href="#" class="list-group-item list-group-item-action text-danger">System Maintenance</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

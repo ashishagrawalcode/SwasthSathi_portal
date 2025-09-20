@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASHA Household List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        /* Basic styling for the page */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        /* Search and Add buttons styling */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .controls input[type="text"] {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            width: 70%;
+        }
+        .controls button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+        }
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .view-details-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .edit-btn {
+            background-color: #ffc107;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .no-results {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Household List</h1>
+
+        <div class="controls">
+            <form id="search-form" action="{{ url_for('search_households') }}" method="GET">
+                <input type="text" id="search-input" name="query" placeholder="Search by name or ID...">
+                <button type="submit">Search</button>
+            </form>
+            <a href="{{ url_for('add_new_household') }}">
+                <button>+ Add New Household</button>
+            </a>
+        </div>
+
+        {% if households %}
+            <table id="household-table">
+                <thead>
+                    <tr>
+                        <th>Household ID</th>
+                        <th>Household Name</th>
+                        <th>Address</th>
+                        <th>No. of Members</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for household in households %}
+                        <tr data-name="{{ household.household_name }}" data-id="{{ household.id }}">
+                            <td>{{ household.id }}</td>
+                            <td>{{ household.household_name }}</td>
+                            <td>{{ household.address }}</td>
+                            <td>{{ household.members_count }}</td>
+                            <td class="action-buttons">
+                                <a href="{{ url_for('household_details', household_id=household.id) }}">
+                                    <button class="view-details-btn">View Details</button>
+                                </a>
+                                <a href="{{ url_for('edit_household', household_id=household.id) }}">
+                                    <button class="edit-btn">Edit</button>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="no-results">No households found.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        // Optional JavaScript for client-side filtering
+        const searchForm = document.getElementById('search-form');
+        const searchInput = document.getElementById('search-input');
+        const householdTable = document.getElementById('household-table');
+        const rows = householdTable.getElementsByTagName('tr');
+
+        if (searchInput) {
+            searchInput.addEventListener('keyup', () => {
+                const filter = searchInput.value.toLowerCase();
+                let resultsFound = false;
+                for (let i = 1; i < rows.length; i++) { // Start at 1 to skip the header row
+                    const name = rows[i].dataset.name.toLowerCase();
+                    const id = rows[i].dataset.id.toLowerCase();
+                    if (name.includes(filter) || id.includes(filter)) {
+                        rows[i].style.display = "";
+                        resultsFound = true;
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
+                const noResults = document.querySelector('.no-results');
+                if (noResults) {
+                    noResults.style.display = resultsFound ? 'none' : 'block';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

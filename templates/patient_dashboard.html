@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+{% block title %}Patient Dashboard{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+    <div class="section-header">
+        <h2>Patient Dashboard</h2>
+        <p>Welcome, {{ session.user_name }}! Manage your health journey here.</p>
+    </div>
+
+    <!-- ABHA ID Card Section -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="card abha-card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Ayushman Bharat Health Account</h4>
+                        <img src="{{ url_for('static', filename='images/abha-logo.png') }}" alt="ABHA Logo" style="height: 40px;">
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-4 text-center">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ session.user_id }}-{{ session.user_name }}" alt="QR Code" class="img-fluid rounded mb-3">
+                        </div>
+                        <div class="col-md-8">
+                            <h5 class="card-title">{{ session.user_name }}</h5>
+                            <p class="card-text mb-1"><strong>ABHA Number:</strong> <span class="text-muted">XX-XXXX-XXXX-XXXX</span></p>
+                            <p class="card-text"><strong>Health ID:</strong> <span class="text-muted">{{ session.user_name | lower | replace(' ', '.') }}@abdm</span></p>
+                            <a href="#" class="btn btn-sm btn-outline-primary">View & Share Card</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Features -->
+    <div class="portals-grid">
+        <div class="portal-card">
+            <i class="fas fa-user-doctor fa-3x mb-3 text-primary"></i>
+            <h3>Find a Doctor</h3>
+            <p>Search for specialists and start a consultation.</p>
+            <a href="{{ url_for('find_doctor') }}" class="btn btn-secondary mt-3">Search Doctors</a>
+        </div>
+        <div class="portal-card">
+            <i class="fas fa-history fa-3x mb-3 text-primary"></i>
+            <h3>My History</h3>
+            <p>Access your past consultations and lab reports.</p>
+            <a href="{{ url_for('patient_history') }}" class="btn btn-secondary mt-3">View History</a>
+        </div>
+        <div class="portal-card">
+            <i class="fas fa-stethoscope fa-3x mb-3 text-primary"></i>
+            <h3>Symptom Checker</h3>
+            <p>Get a preliminary analysis of your symptoms.</p>
+            <a href="{{ url_for('symptom_checker') }}" class="btn btn-secondary mt-3">Check Symptoms</a>
+        </div>
+        <div class="portal-card">
+            <i class="fas fa-pills fa-3x mb-3 text-primary"></i>
+            <h3>Search Medicines</h3>
+            <p>Find information about medicines and their uses.</p>
+            <a href="{{ url_for('search_medicines') }}" class="btn btn-secondary mt-3">Search Medicines</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+    .abha-card {
+        border: none;
+        border-radius: 15px;
+        background: #fff;
+    }
+    .abha-card .card-header {
+        border-radius: 15px 15px 0 0;
+        background-image: linear-gradient(45deg, #0d6efd, #0dcaf0);
+    }
+    .abha-card .card-title {
+        font-weight: 700;
+        color: #333;
+        font-size: 1.5rem;
+    }
+</style>
+{% endblock %}

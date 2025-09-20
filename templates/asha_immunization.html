@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}Immunization Schedules{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Immunization Schedules</h1>
+        <a href="{{ url_for('asha_mch') }}" class="btn btn-secondary">Back to MCH Portal</a>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Child Name</th>
+                    <th scope="col">Date of Birth</th>
+                    <th scope="col">Next Vaccine Due</th>
+                    <th scope="col">Due Date</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for child in children %}
+                <tr>
+                    <td>{{ child.name }}</td>
+                    <td>{{ child.dob }}</td>
+                    <td><span class="badge bg-warning text-dark">{{ child.next_vaccine }}</span></td>
+                    <td>{{ child.next_vaccine_date }}</td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-info">View Full Schedule</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No children records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

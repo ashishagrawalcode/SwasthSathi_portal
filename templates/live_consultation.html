@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+{% block title %}Live Consultation{% endblock %}
+
+{% block content %}
+<div class="new-consult-container">
+    <div class="consult-chat-view">
+        <div class="consult-header">
+            <div class="doctor-info">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <strong>{{ doctor_name }}</strong>
+                    <span>Online</span>
+                </div>
+            </div>
+            <div class="consult-actions">
+                <button class="btn btn-secondary" id="start-video-call-btn"><i class="fas fa-video"></i> Start Video Call</button>
+            </div>
+        </div>
+        <div class="consult-messages" id="live-chat-messages">
+            <div class="message received">
+                <p>Hello! I'm ready to begin the consultation. How can I help you today?</p>
+                <span class="timestamp">9:32 PM</span>
+            </div>
+        </div>
+        
+        <form id="consultation-form" action="{{ url_for('upload_consultation_file') }}" method="POST" enctype="multipart/form-data" class="consult-input-area">
+            <input type="hidden" name="doctor_id" value="{{ request.view_args.doctor_id }}">
+            <input type="file" id="file-upload-input" name="consultation_photo" accept="image/*" style="display: none;">
+
+            <button type="button" class="icon-btn" id="attach-file-btn"><i class="fas fa-paperclip"></i></button>
+            
+            <input type="text" id="chat-message-input" placeholder="Type a message...">
+            <button type="button" class="send-btn" id="send-message-btn"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+
+    <div class="video-call-modal" id="video-call-modal">
+        </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Element Selections ---
+    const videoModal = document.getElementById('video-call-modal');
+    const startVideoBtn = document.getElementById('start-video-call-btn');
+    const closeVideoBtn = document.getElementById('close-video-call-btn');
+    const endVideoBtn = document.getElementById('end-video-call-btn');
+    
+    const chatInput = document.getElementById('chat-message-input');
+    const sendBtn = document.getElementById('send-message-btn');
+    const messagesContainer = document.getElementById('live-chat-messages');
+
+    // --- NEW: File Upload Elements ---
+    const consultationForm = document.getElementById('consultation-form');
+    const attachBtn = document.getElementById('attach-file-btn');
+    const fileInput = document.getElementById('file-upload-input');
+
+    // --- Video Modal Controls ---
+    function openModal() { videoModal.style.display = 'flex'; }
+    function closeModal() { videoModal.style.display = 'none'; }
+    startVideoBtn.addEventListener('click', openModal);
+    if (closeVideoBtn) closeVideoBtn.addEventListener('click', closeModal);
+    if (endVideoBtn) endVideoBtn.addEventListener('click', closeModal);
+
+    // --- NEW: File Upload Logic ---
+    // When the paperclip icon is clicked, trigger the hidden file input
+    attachBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // When a file is chosen, automatically submit the form to upload it
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            consultationForm.submit();
+        }
+    });
+
+    // --- Basic Chat Functionality ---
+    function sendMessage() {
+        const messageText = chatInput.value.trim();
+        if (messageText === '') return;
+
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', 'sent');
+        
+        const textElement = document.createElement('p');
+        textElement.textContent = messageText;
+        
+        const timeElement = document.createElement('span');
+        timeElement.classList.add('timestamp');
+        timeElement.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        messageElement.appendChild(textElement);
+        messageElement.appendChild(timeElement);
+        
+        messagesContainer.appendChild(messageElement);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        chatInput.value = '';
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            // Prevent form submission on Enter, only send chat message
+            event.preventDefault(); 
+            sendMessage();
+        }
+    });
+});
+</script>
+{% endblock %}
