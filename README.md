@@ -1,4 +1,4 @@
-# Medi-X Healthcare Website
+# SwasthSathi - Telemedicine Website
 
 A modern, responsive healthcare website built with vanilla HTML, CSS, and JavaScript featuring yellow-green gradient design.
 
@@ -255,5 +255,6 @@ For questions or issues:
 This project is open source and available under the [MIT License](LICENSE).
 
 ---
+
 
 **Built with ❤️ for better healthcare accessibility**
